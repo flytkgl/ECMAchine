@@ -1,19 +1,19 @@
 /*
- * The OS singleton performs power- and state-related operations
+ * 这操作系统的单例执行能力- 和状态相关操作
  */
 var OS = {
   initialize: function() {
-    Display.echo("Launching ECMAchine ...");
+    Display.echo("启动 小宇宙 ...");
     initEvaluator();
     this.loadState();
     Filesystem.initialize();
 
-    // start automatically saving filesystem to localStorage every 60 sec
+    // 开始每隔60秒自动保存文件系统到本地缓存
     setInterval(OS.saveState, 60000);
   },
 
   close: function() {
-    window.open('', '_self', ''); // Arthur Filliot's suggestion - allows window.close() to work in Chrome
+    window.open('', '_self', ''); // 别人的建议 - 允许 window.close() 工作在Chrome浏览器
     window.close();
   },
 
@@ -23,7 +23,7 @@ var OS = {
 
   loadState: function() {
     if (typeof localStorage != "undefined" && typeof localStorage.fileSystemFrame != "undefined") {
-      Display.echo("Restoring filesystem state ...");
+      Display.echo("恢复 文件系统状态 ...");
       var fileSystemFrame = JSON.parse(localStorage.fileSystemFrame);
    } else {
        var fileSystemFrame = defaultFileSystemFrame;
@@ -45,10 +45,10 @@ var OS = {
 }
 
 /*
- * The display singleton interacts with the terminal
+ * 显示单例与终端
  */
 var Display = {
-  terminal: null, // terminal object
+  terminal: null, // 终端对象
   lineContinuationString: '.. ',
 
   initialize: function(term) {
@@ -56,7 +56,7 @@ var Display = {
   },
 
   /*
-   * Preprocesses display output
+   * 预处理显示输出
    */
   preprocess: function(str) {
 		str = prepareString(str);
@@ -67,7 +67,7 @@ var Display = {
   },
 
   /*
-   * Process and display output
+   * 过程和显示输出
    */
   echo: function(str) {
     str = this.preprocess(str);
@@ -78,10 +78,10 @@ var Display = {
   },
 
   /*
-   * Refresh terminal: resize + scroll to bottom
+   * 刷新终端:调整+滚动到底
    */
   refresh: function() {
-    // timeout needed to avoid some silly UI issues
+    // 超时需要避免一些愚蠢的UI问题
     setTimeout( function() {
       Display.terminal.resize();
       $(document).scrollTop($(document).height());
@@ -89,7 +89,7 @@ var Display = {
   },
 
   /*
-   * Resize terminal to avoid overlap with overlays
+   * 调整终端以避免重叠和覆盖
    */
   resize: function() {
     if ($('.overlayRight').length == 0) {
@@ -104,19 +104,19 @@ var Display = {
   },
 
   /*
-   * Adds a new line and removes previous command from output and history
+   * 添加一个新行和删除之前的命令从输出和历史
    */
   newline: function(command) {
-    this.terminal.set_command(command + '\n' + this.lineContinuationString); // start new line in command
-    this.terminal.lines(this.terminal.lines().slice(0,-1)); // remove last line in output
+    this.terminal.set_command(command + '\n' + this.lineContinuationString); // 开始新行命令
+    this.terminal.lines(this.terminal.lines().slice(0,-1)); // 删除最后一行输出
     for (i = 1; i < command.split(/\n/).length; i++) {
-      this.terminal.history().pop(); // need to pop once for each line after the first
+      this.terminal.history().pop(); // 一旦在第一，需要对每一行pop
     }
-    this.terminal.refresh(); // refresh terminal
+    this.terminal.refresh(); // 刷新终端
   },
 
   /*
-   * Returns the terminal object for direct interaction
+   * 返回终端对象直接交互
    */
   terminal: function() {
     return this.terminal;
@@ -130,19 +130,19 @@ var Display = {
 }
 
 /*
- * The Filesystem singleton performs filesystem-related operations
+ * 文件系统单例执行文件相关操作
  */
 var Filesystem = {
-  fs: null, // path to file system
-  currentDir: '/', // current directory
+  fs: null, // 文件系统路径
+  currentDir: '/', //  当前目录
 
   /*
-   * Initializes filesystem (called from OS.initialize() )
+   * 初始化文件系统(称为从操作系统初始化())
    */
   initialize: function() {
-    Display.echo('Launching filesystem ...');
+    Display.echo('启动 文件系统 ...');
 
-    // Run all files in /startup
+    // 从 /启动 运行所有文件
     for (var fname in Filesystem.getDir('/startup')) {
       var contents = Filesystem.getFile('/startup/' + fname).contents;
       evaluate(contents);
@@ -150,13 +150,13 @@ var Filesystem = {
   },
 
   //
-  // HELPER FUNCTIONS
+  // 辅助函数
   //
 
   importFSFrame: function(fileSystemFrame) {
     this.fs = fileSystemFrame['__fileSystem'];
 
-    // Add file system frame to environment
+    // 添加文件系统到求值环境
     globalEnvironment.push(fileSystemFrame);
   },
 
@@ -165,16 +165,16 @@ var Filesystem = {
   },
 
   /*
-   * Gets new path (e.g. for 'cd' command)
+   * 得到新的路径 (例如“cd”命令)
    */
   calculatePath: function(dir) {
-    if (dir == '') { // current dir
+    if (dir == '') { // 当前目录
       return this.currentDir;
-    } else if (dir == '/') { // top-level dir
+    } else if (dir == '/') { // 顶层目录
       return '/';
-    } else if (dir[0] == '/') { // calculate from top-level dir
+    } else if (dir[0] == '/') { // 从顶层目录计算
       return dir;
-    } else { // calculate from current dir
+    } else { // 从当前目录计算
       var pathComponents = this.currentDir.split('/');
       var dirComponents = dir.split('/');
       dirComponents.forEach(function (comp) {
@@ -190,7 +190,7 @@ var Filesystem = {
   },
 
   /*
-   * e.g. '/dir1/dir2/file' => 'file'
+   * 例如 '/dir1/dir2/file' => 'file'
    */
   getNameFromPath: function(path) {
     var pathSplit = path.split('/');
@@ -198,11 +198,11 @@ var Filesystem = {
   },
 
   /*
-   * e.g. '/dir1/dir2/file' => '/dir1/dir2'
+   * 例如 '/dir1/dir2/file' => '/dir1/dir2'
    */
   getFolderFromPath: function(path) {
     var pathSplit = path.split('/');
-    if (path[0] == '/') { // top-level dir
+    if (path[0] == '/') { // 顶层目录
       var folder = pathSplit.slice(0, pathSplit.length - 1).join('/');
       return (folder == '')? '/' : folder;
     } else {
@@ -211,94 +211,94 @@ var Filesystem = {
   },
 
   /*
-   * Gets a file from a path
+   * 从一个路径得到一个文件
    */
   getFile: function(path) {
     return this.fs[this.getFolderFromPath(path)][this.getNameFromPath(path)];
   },
 
   /*
-   * Gets all files in directory
+   * 获得目录中的所有文件
    */
   getDir: function(dir) {
     return this.fs[dir];
   },
 
   /*
-   * Creates/updates file at given path
+   * 创建/更新文件在指定的路径
    */
   setFile: function(path, file) {
     this.fs[this.getFolderFromPath(path)][this.getNameFromPath(path)] = file;
   },
 
   /*
-   * Creates/updates dir at given path
+   * 创建/更新目录在指定路径
    */
   setDir: function(path, dir) {
     this.fs[path] = dir;
   },
 
   /*
-   * Deletes file at path
+   * 删除文件路径
    */
   deleteFileAtPath: function(path) {
     delete this.fs[this.getFolderFromPath(path)][this.getNameFromPath(path)];
   },
 
   /*
-   * Deletes directory
+   * 删除目录
    */
   deleteDir: function(path) {
     delete this.fs[path];
   },
 
   //
-  // EXCEPTIONS
+  // 异常处理
   //
 
 
   /*
-   * Throws exception if path not valid
+   * 如路径无效，抛出异常
    */
   checkPathExists: function(path) {
     if (this.fs[path] === undefined) {
-      throw 'File system error: path "' + path + '" does not exist';
+      throw '文件系统错误: 路径 "' + path + '" 不存在';
     }
   },
 
   /*
-   * Throws exception if file doesn't exist
+   * 如果文件不存在，抛出异常
    */
   checkFileExists: function(file, path) {
     if (file === undefined) {
-      throw 'File system error: file "' + path + '" does not exist';
+      throw '文件系统错误: 文件 "' + path + '" 不存在';
     }
   },
 
   /*
-   * Throws exception if file is a directory
+   * 如果文件是一个目录，抛出异常
    */
   checkNotADir: function(file, path) {
     if (file !== undefined && file.type == 'dir') {
-      throw 'File system error: "' + path + '" is a directory';
+      throw '文件系统错误: "' + path + '" 是一个目录';
     }
   },
 
   /*
-   * Throws exception if file/dir already exists
+   * 如果文件/目录已经存在，抛出异常
    */
   checkAlreadyExists: function(file, path) {
     if (file !== undefined) {
-      throw 'Error: "' + path + '" already exists';
+      throw '错误: "' + path + '" 已经存在';
     }
   },
 
   //
-  // FILESYSTEM FUNCTIONS
+  // 文件系统函数库
   //
 
   /*
-   * Lists files in directory
+   * 目录中列表文件
    */
   listFiles: function(dir) {
     var workingDir = dir ? this.calculatePath(dir) : this.currentDir;
@@ -313,8 +313,8 @@ var Filesystem = {
   },
 
   /*
-   * Changes the current directory
-   * Returns the new path
+   * 更改当前目录
+   * 返回新的路径
    */
   navigate: function(path) {
     var newPath = this.calculatePath(path);
@@ -324,7 +324,7 @@ var Filesystem = {
   },
 
   /*
-   * Returns file contents
+   * 返回文件内容
    */
   readFile: function(path) {
     var file = this.getFile(path);
@@ -334,8 +334,8 @@ var Filesystem = {
   },
 
   /*
-   * Creates a directory
-   * Returns its path
+   * 创建一个目录
+   * 返回其路径
    */
   makeDir: function(name) {
     var newDirPath = this.calculatePath(name);
@@ -346,8 +346,8 @@ var Filesystem = {
   },
 
   /*
-   * Creates new file
-   * Returns its path
+   * 创建新文件
+   * 返回其路径
    */
   newFile: function(path) {
     var file = this.getFile(path);
@@ -357,8 +357,8 @@ var Filesystem = {
   },
 
   /*
-   * Saves the file
-   * Returns its path
+   * 保存文件
+   * 返回其路径
    */
   saveFile: function(path, contents) {
     var file = this.getFile(path);
@@ -368,8 +368,8 @@ var Filesystem = {
   },
 
   /*
-   * Removes a file or directory
-   * Returns its path
+   * 删除一个文件或目录
+   * 返回其路径
    */
   removeItem: function(path) {
     var file = this.getFile(path);
@@ -383,8 +383,8 @@ var Filesystem = {
   },
 
   /*
-   * Copies a file or directory to a new path
-   * Returns {oldPath, newPath}
+   * 复制一个文件或目录到一个新的路径
+   * 返回 {旧路径, 新路径}
    */
   copyItem: function(path, newPath) {
     var file = this.getFile(path);
@@ -395,7 +395,7 @@ var Filesystem = {
     this.checkFileExists(file, path);
     this.checkPathExists(newFolderPath);
 
-    // if copying to a dir, append current filename to path
+    // 如果复制到一个目录,添加当前文件名的路径
     if (this.getFile(newPath) && this.getFile(newPath).type == 'dir') {
       newPath = newPath + '/' + this.getNameFromPath(path);
     }
@@ -415,7 +415,7 @@ var Filesystem = {
 };
 
 /*
- * The Processes singleton handles processes
+ * 单处理线程的进程
  */
 var Processes = {
 	processList: [],
@@ -426,7 +426,7 @@ var Processes = {
 		'name': 'Terminal',
 		'isTerminal': true,
 
-		// Performance
+		// 性能
 		'timeStarted': new Date().getTime(),
 		'timeElapsed': function () { return ((new Date().getTime()) - this.timeStarted); },
 		'evals': 0
@@ -436,7 +436,7 @@ var Processes = {
 		if (pid == -1 || pid == null) {
 			return this.terminalProcess;
 		} else if (this.processList[pid] === undefined || this.processList[pid].terminated) {
-			throw 'There is no process with PID ' + pid;
+			throw '没有进程与PID ' + pid;
 		} else {
 			return this.processList[pid];
 		}
@@ -455,7 +455,7 @@ var Processes = {
 	},
 
 	/*
-	 * Increments the evals count of the current process
+	 * 增加当前进程的求值计数
 	 */
 	incrementEvals: function() {
 		var process = this.getCurrentProcess();
@@ -463,12 +463,12 @@ var Processes = {
 	},
 
 	/*
-	 * Starts a new process, returns its PID
+	 * 启动一个新的进程,返回其PID
 	 */
 	startProcess: function(name, contents, refreshRate) {
 		var pid = this.processList.length;
 
-		// start interval
+		// 启动间隔
 		var interval = setInterval(function () {
 			var result = evaluate(contents, pid);
 			if (result !== undefined) {
@@ -476,7 +476,7 @@ var Processes = {
 			}
 		}, refreshRate);
 
-		// add to process list
+		// 添加到进程列表
 		this.processList.push({
 			'pid': pid,
 			'name': Filesystem.getNameFromPath(name),
@@ -485,7 +485,7 @@ var Processes = {
 			'terminated': false,
 			'overlays': [],
 
-			// Performance
+			// 性能
 			'timeStarted': new Date().getTime(),
 			'timeElapsed': function () { return ((new Date().getTime()) - this.timeStarted); },
 			'interval': refreshRate,
@@ -496,12 +496,12 @@ var Processes = {
 	},
 
 	/*
-	 * Kills a process by PID, returns result
+	 * 杀死一个进程PID,返回结果
 	 */
 	killProcess: function(pid) {
 		var proc = this.getProcessByID(pid);
 		if (proc.isTerminal) {
-			throw 'Can\'t kill terminal';
+			throw '不能杀死终端';
 		}
 		clearInterval(proc.process);
 		proc.terminated = true;
@@ -511,11 +511,11 @@ var Processes = {
 			$('#overlays #' + name).remove();}
 		);
 
-		return new Array('Process with PID ' + pid + ' [' + proc.name + '] terminated');
+		return new Array('进程与PID ' + pid + ' [' + proc.name + '] 终止');
 	},
 
 	/*
-	 * Returns a list of running processes
+	 * 返回一个列表的运行过程
 	 */
 	listProcesses: function() {
 		var procs = this.processList.filter(function (proc) {return !proc.terminated});
@@ -524,7 +524,7 @@ var Processes = {
 	},
 
 	/*
-	 * Returns the evals/sec performance of a process by PID
+	 * 返回 求值/秒 的性能的一个进程PID
 	 */
 	getPerformance: function(pid) {
 		var proc = this.getProcessByID(pid);
@@ -534,7 +534,7 @@ var Processes = {
 	},
 
 	/*
-	 * Registers a named overlay as belonging to the current process
+	 * 注册一个名为叠加属于当前进程
 	 */
 	registerOverlay: function(name) {
 		if (this.currentPID != null && this.getProcessByID(this.currentPID).overlays.indexOf(name) < 0) {

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>ECMAchine</title>
+    <title>小宇宙</title>
 
     <script src="js/lib/jquery-1.7.1.min.js"></script>
     <script src="js/lib/jquery.mousewheel-min.js"></script>
@@ -22,7 +22,7 @@
         $(document.documentElement).terminal(function(command, term) {
             if (command !== '') {
                 if ((command.split('(').length > command.split(')').length) || (command.split('"').length + 1) % 2 == 1) {
-                    // incomplete expression - remove from lines and history
+                    // 不完整的表达式 - 删除输入记录
                     Display.newline(command);
                 } else {
                     var result = evaluate(command);
@@ -36,10 +36,10 @@
                 Display.echo('');
             }
         }, {
-            greetings: 'Welcome to the ECMAchine! It\'s a little LISPy shell that dreams of being an operating system. Enter (help) for a list of commands. Read more at https://github.com/AlexNisnevich/ECMAchine',
+            greetings: '欢迎来到小宇宙!它有个LISP的外壳,梦想成为一个操作系统。输入(帮助)查看命令列表。阅读更多：https://github.com/flytkgl/ECMAchine',
             name: 'terminal',
             height: 200,
-            prompt: 'ecmachine:/ guest$',
+            prompt: '小宇宙:/ 游客$',
             onInit: function(term) {
                 $('body').css('margin', '0');
 				        $('<div>').attr('id', 'overlays').appendTo('.terminal');
@@ -48,7 +48,7 @@
                 Display.resize();
             },
 
-            // custom options
+            // 自定义选项
             historycolors: {
                 'prompt': '#080',
                 'command': '#399'

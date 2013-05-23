@@ -1,13 +1,13 @@
 
 /*
- * Globals
+ * 全局的
  */
 
 var globalEnvironment = [];
 var globalFrame = {};
 
 /*
- * (used by both eval and apply)
+ * (用于两者 eval 和 apply)
  */
 function evalSequence(exps, env) {
 	for (var i = 0; i < exps.length - 1; i++) {
@@ -17,18 +17,18 @@ function evalSequence(exps, env) {
 }
 
 /*
- * Evaluator
+ * 求值程序
  */
 
 function initEvaluator() {
-	Display.echo('Launching LISP evaluator ...');
+	Display.echo('启动 LISP解释器 ...');
   for (var primitive in primitiveProcedures) {
       globalFrame[primitive] = {
           'primitive': true,
           'name': primitive,
           'body': primitiveProcedures[primitive],
           toString: function () {
-          	return "#<Function " + this.name + ">";
+          	return "#<函数： " + this.name + ">";
           }
       };
   }
@@ -42,10 +42,10 @@ function evaluate(command, pid) {
 }
 
 /*
- * Parses S-expression into a nested list
+ * 解析S-表达式为一个嵌套列表
  */
 function parse(sexp) {
-	// console.log("Parsing " + sexp);
+	// console.log("解析 " + S-表达式);
 	
 	var isInt = function(value) {
 	  if ((parseFloat(value) == parseInt(value)) && !isNaN(value)){
@@ -80,12 +80,12 @@ function parse(sexp) {
     return tokens;
   };
     
-  // do ( and ) match?
+  // 做 ( 和 ) 匹配?
 	if (sexp.split('(').length != sexp.split(')').length) { 
-		throw 'Parse Error: Parentheses do not match'; 
+		throw '解析错误: 括号不匹配'; 
 	}
     
-  // trim
+  // 修整
   sexp = sexp.replace(/\n\.\./g, " ") // "\n.." => " "
   sexp = sexp.replace(/\s+/g, " "); // eg "  " => " "
   sexp = sexp.replace(/\s+\)/g, ")"); // eg " )" => ")"
@@ -110,8 +110,8 @@ function parse(sexp) {
 }
 
 /*
- * Environments
- * An environment is a list of frames (frame = associative array)
+ * 环境
+ * 一个环境是一个框架列表(框架=关联数组)
  */
 
 function extendEnvironment(vars, vals, baseEnv) {
@@ -125,7 +125,7 @@ function extendEnvironment(vars, vals, baseEnv) {
 		newEnv.unshift(newFrame);
 		return newEnv;
 	} else {
-		throw 'Apply Error: Incorrect number of parameters: expecting ' + vars + ' but received ' + vals;
+		throw 'Apply 错误: 不正确的数量的参数:期待有 ' + vars + ' 但只收到 ' + vals;
 	}
 }
 
@@ -136,7 +136,7 @@ function lookupVariableValue(variable, env) {
 			return frame[variable];
 		}
 	}
-	throw 'Eval Error: Unbound variable ' + variable;
+	throw 'Eval 错误: 未定义变量 ' + variable;
 }
 
 function assignVariableValue(variable, val, env) {
@@ -147,7 +147,7 @@ function assignVariableValue(variable, val, env) {
 			return;
 		}
 	}
-	throw 'Eval Error: Unbound variable ' + variable;
+	throw 'Eval 错误: 未定义变量 ' + variable;
 }
 
 function defineVariable(variable, val, env) {
@@ -157,14 +157,14 @@ function defineVariable(variable, val, env) {
 }
  
 /*
- * Evaluates an expression in the given environment
+ * 解释一个表达式在给定的环境
  */
 function lispEval(exp, env) {
-	// console.log('Evaluating: ' + exp + ' (Process ' + Processes.currentPID + ')');
+	// console.log('解释中: ' + exp + ' (Process ' + Processes.currentPID + ')');
 
 	Processes.incrementEvals();
 	
-	// Detectors
+	// 检测器
 	function isSelfEvaluating(exp) { 
 		return typeof exp == 'number';
 	}
@@ -208,7 +208,7 @@ function lispEval(exp, env) {
 		return typeof exp == 'object' && exp.length >= 1;
 	}
 	
-	// Parsers
+	// 解析器
 	function cdr(exp) {
 		return exp.slice(1);
 	}
@@ -227,10 +227,10 @@ function lispEval(exp, env) {
 		}
 		
 		if (quotedElt.isList && quotedElt.length == 3 && quotedElt[1] == '.') {
-			// quoted pair
+			// 引用点对
 			return new Pair(quotedElt[0], quotedElt[2]);
 		} else {
-			// quoted list or string literal
+			// 引用列表或字符串
 			return quotedElt;
 		}
 	}
@@ -243,7 +243,7 @@ function lispEval(exp, env) {
 		})
 	}
 	
-	// Evaluators
+	// 解释器
 	function evalAssignment(exp, env) {
 		assignVariableValue(exp[1],
 			lispEval(exp[2], env),
@@ -296,7 +296,7 @@ function lispEval(exp, env) {
 			}
 			return lispEval(exp[2], newEnv);
 		} else if (exp[0] == 'letrec') {
-			throw "Eval Error: letrec control structure not yet implemented: " + exp; 
+			throw "Eval 错误: letrec控制结构尚未实现: " + exp; 
 		}
 	}
 	function makeProcedure(parameters, body, environment) {
@@ -357,12 +357,12 @@ function lispEval(exp, env) {
 	} else if (isApplication(exp)) {
 		return lispApply(lispEval(exp[0], env), listOfValues(cdr(exp), env));
 	} else {
-		throw "Eval Error: Unknown expression type: " + exp;
+		throw "Eval 错误: 未知的表达式类型: " + exp;
 	}
 }
 
 /*
- * Applies a procedure to a given set of arguments
+ * 对于一个给定的应用程序的参数设置
  */
 function lispApply(procedure, arguments) {
 	// console.log('Applying: ' + procedure + ' to ' + arguments);
@@ -385,7 +385,7 @@ function lispApply(procedure, arguments) {
 		var args = arguments;
 		
 		if (procedure.argsParameter !== false) {
-			// there is an args parameter - assign remaining arguments to it
+			// 有一个args参数——分配剩余的参数来它
 			params.push(procedure.argsParameter);
 			args = args.slice(0, procedure.parameters.length);
 			args.push(arguments.slice(procedure.parameters.length, arguments.length))
@@ -393,6 +393,6 @@ function lispApply(procedure, arguments) {
 		var newEnvironment = extendEnvironment(params, args, procedure.environment);
 		return evalSequence(procedure.body, newEnvironment);
 	} else {
-		throw "Apply Error: Unknown procedure type: " + procedure;
+		throw "Apply 错误: 未知程序类型: " + procedure;
 	}
 }

@@ -1,9 +1,9 @@
 /*
- * Primitive procedure definitions
+ * 原始函数定义
  */
 
 var primitiveProcedures = {
-	// Hooks to underlying environment
+	// 钩到底层环境
 	'environment': function() {
 		var variables = [];
 		for (var i = 0; i < globalEnvironment.length; i++) {
@@ -18,7 +18,7 @@ var primitiveProcedures = {
 		if (args.length == 1 && args[0].primitive !== undefined) {
 			return args[0].body;
 		} else {
-			throw 'js-inspect Error: JavaScript function required, but got ' + args;
+			throw 'js-inspect 错误: JavaScript函数的要求,但是得到 ' + args;
 		}
 	},
 	'js-apply': function(args) {
@@ -46,20 +46,20 @@ var primitiveProcedures = {
 			jsFunc = jsObj + '.' + jsFunc;
 			var jsArgs = prepareArg(args[2]);
 		} else {
-			throw 'js-apply error: Expected 2 or 3 arguments, but got ' + args.length;
+			throw 'js-apply 错误: 预计2或3的参数,但是得到 ' + args.length;
 		}
 
 		return eval(jsFunc + '(' + jsArgs + ')');
 	},
 
-	// Arithmetic
+	// 算法
 	'+': function(args) {
 		var string = false;
 		args = args.map(function (arg) {
-			if (arg.isString) { // string concatenation
+			if (arg.isString) { // 字符串衔接
 				string = true;
 				return arg.toEvalString();
-			} else if (typeof arg == 'string') { // quoted literal concatenation
+			} else if (typeof arg == 'string') { // 引用文字连接
 				return arg.toEvalString();
 			} else {
 				return arg;
@@ -90,7 +90,7 @@ var primitiveProcedures = {
 		}
 	},
 
-	// Comparisons
+	// 比较
 	'=': function (args) {
 		if (args[0].isString && args[1].isString) {
 			return (args[0].toString() == args[1].toString());
@@ -104,16 +104,16 @@ var primitiveProcedures = {
 	'>=': function (args) {return (args[0] >= args[1])},
 	'<=': function (args) {return (args[0] <= args[1])},
 
-	// Logical
+	// 逻辑
 	'not': function (args) {return !(args[0]);},
 	'and': function (args) {return eval(args.join('&&'));},
 	'or': function (args) {return eval(args.join('||'));},
 
-	// List operations
+	// 列表操作
 	'cons': function (args) {
 		if (args[1].isList) {
-			// (1 (2 3)) => (1 2 3), since we represent everything as lists (not pairs)
-			// in the underlying environment
+			// (1 (2 3)) => (1 2 3), 因为我们代表一切列表(不是点对)
+			// 在底层环境
 			newList = clone(args[1]);
 			newList.unshift(args[0]);
 			return newList;
@@ -136,7 +136,7 @@ var primitiveProcedures = {
 		return args[0].length;
 	},
 
-	// Misc Lisp
+	// 杂项 Lisp
 	'do-nothing': function () {
 		return;
 	},
@@ -148,9 +148,9 @@ var primitiveProcedures = {
 		return;
 	},
 	'sort': function (args) {
-		// This doesn't NEED to be a primitive, but it's a pain to implement,
-		// and I'd rather use JavaScript's underlying sort
-		// Usage: (sort lst [keyfunc])
+		// 这并不需要一个原始,但它是一个痛苦的实现,
+		// 我宁愿使用JavaScript的基本分类
+		// 用法: (sort lst [keyfunc])
 		return args[0].sort(function (a, b) {
 			var keyA = (args.length > 1) ? lispApply(args[1], [a]) : a;
 			var keyB = (args.length > 1) ? lispApply(args[1], [b]) : b;
@@ -162,49 +162,49 @@ var primitiveProcedures = {
 		});
 	},
 
-	// ECMAchine general
+	// 小宇宙综述
 	'help': function () {
-		return 'The following LISP commands are supported as primitives:' +
+		return '下列 LISP 命令作为原语支持:' +
 				'\n\t +, -, *, /, >, <, =, and, begin, car, cdr, cond, cons, define, if, lambda, length, let, let*, list, not, or, quote' +
-			'\nThe following LISP commands are among those defined in the standard library (located in /startup):' +
+			'\n下列 LISP 命令在标准库中定义 (位于 /startup):' +
 				'\n\t abs, cadr, filter, map, null?, sum' +
-			'\nEnvironment commands:' +
-				'\n\t (environment)              Lists the currently bound variables' +
-				'\n\t (inspect-primitive [[i;;]func])   Shows the JavaScript code of a primitive function' +
-				'\n\t (js-apply [[i;;]func] [[[i;;]obj]] [[i;;]args]) Executes a JavaScript function' +
-			'\nFile system commands:' +
-				'\n\t (ls)                       Lists the contents of the current directory' +
-				'\n\t (cd [[i;;]path])                  Navigates to another directory' +
-				'\n\t (path [[i;;]dir1 dir2] [...])     Constructs a path string [[i;;](e.g. dir1/dir2)] from a list of subdirectories' +
-				'\n\t (read [[i;;]filepath])            Displays the contents of a file' +
-				'\n\t (exec [[i;;]filepath])            Executes a LISP file' +
-				'\n\t (mkdir [[i;;]name])               Creates a new directory' +
-				'\n\t (new [[i;;]path])                 Creates a new file' +
-				'\n\t (save [[i;;]path text])           Saves text to a file, replacing current contents if the file already exists' +
-				'\n\t (appnd [[i;;]path text])          Appends text to an existing file' +
-				'\n\t (mv [[i;;]oldpath newpath])       Moves a file or directory to a new location' +
-				'\n\t (cp [[i;;]oldpath newpath])       Copies a file or directory to a new location' +
-				'\n\t (rm [[i;;]path])                  Removes a file or directory' +
-				'\n\t (file? [[i;;]path])               Returns whether there is a file at the given path' +
-				'\n\t (dir? [[i;;]path])                Returns whether there is a directory at the given path' +
-			'\nPower commands:' +
-				'\n\t (shutdown)                 Saves the filesystem and closes ECMAchine' +
-				'\n\t (restart)                  Saves the filesystem and restarts ECMAchine' +
-				'\n\t (reset-to-default)         Resets the filesystem to default configuration and restarts ECMAchine' +
-			'\nProcess commands:' +
-				'\n\t (processes)                Lists the PIDs and filenames of the currently running processes' +
-				'\n\t (start [[i;;]path interval])      Starts a LISP program from a file, with the specified refresh rate (in ms)' +
-				'\n\t (peek [[i;;]pid])                 Shows the code for the process with the specified PID' +
-				'\n\t (kill [[i;;]pid])                 Kills the process with the specified PID' +
-			  '\n\t (performance [[i;;]pid])          Shows the performance of the process with the specified PID (in evals per sec)' +
-			'\nMiscellaneous commands:' +
-				'\n\t (time [[[i;;]format]])            Displays the current time' +
-				'\n\t (overlay [[i;;]txt x y id])       Creates or refreshes an overlay with text at position [[i;;](x,y)] on the screen' +
-				'\n\t (sort [[[i;;]lst]] [[[i;;]keyfunc]])     Sorts a list in ascending order, optionally using the specified key function' +
-				'\n\t (newline)                  Returns a newline character' +
-				'\n\t (do-nothing)               Dummy command' +
-				'\n\t (help)                     Displays this help screen' +
-			'\nFor more help go to https://github.com/AlexNisnevich/ECMAchine'
+			'\n环境 命令:' +
+				'\n\t (environment)              列出当前绑定变量' +
+				'\n\t (inspect-primitive [[i;;]func])   显示一个原始的JavaScript代码的函数' +
+				'\n\t (js-apply [[i;;]func] [[[i;;]obj]] [[i;;]args]) 执行JavaScript函数' +
+			'\n文件系统 命令:' +
+				'\n\t (ls)                       列出当前目录的内容' +
+				'\n\t (cd [[i;;]path])                  进入到另一个目录' +
+				'\n\t (path [[i;;]dir1 dir2] [...])     构造一个路径字符串 [[i;;](e.g. dir1/dir2)] 从列表的子目录' +
+				'\n\t (read [[i;;]filepath])            显示一个文件的内容' +
+				'\n\t (exec [[i;;]filepath])            执行一个LISP文件' +
+				'\n\t (mkdir [[i;;]name])               创建一个新的目录' +
+				'\n\t (new [[i;;]path])                 创建一个新文件' +
+				'\n\t (save [[i;;]path text])           保存文本文件,如果文件已经存在则替换当前内容' +
+				'\n\t (appnd [[i;;]path text])          附加到现有文件的文本' +
+				'\n\t (mv [[i;;]oldpath newpath])       移动一个文件或目录的新位置' +
+				'\n\t (cp [[i;;]oldpath newpath])       复制一个文件或目录的新位置' +
+				'\n\t (rm [[i;;]path])                  删除一个文件或目录' +
+				'\n\t (file? [[i;;]path])               返回是否有一个文件在指定的路径' +
+				'\n\t (dir? [[i;;]path])                返回目录是否有在给定的路径' +
+			'\n开关 命令:' +
+				'\n\t (shutdown)                 保存并关闭Scheme文件系统' +
+				'\n\t (restart)                  保存并重新启动Scheme文件系统' +
+				'\n\t (reset-to-default)         重置为默认配置文件并重新启动Scheme' +
+			'\n进程 命令:' +
+				'\n\t (processes)                列出当前运行的进程的pid与名称' +
+				'\n\t (start [[i;;]path interval])      从一个文件中启动一个LISP程序,指定刷新率(毫秒)' +
+				'\n\t (peek [[i;;]pid])                 显示指定进程的代码与PID' +
+				'\n\t (kill [[i;;]pid])                 杀死进程与指定的PID' +
+			  '\n\t (performance [[i;;]pid])          显示了流程的性能与指定的PID(evals /秒)' +
+			'\n其他 命令:' +
+				'\n\t (time [[[i;;]format]])            可显示当前时间' +
+				'\n\t (overlay [[i;;]txt x y id])       在屏幕上创建或更新一个与文字叠加的位置[[i;;](x,y)]' +
+				'\n\t (sort [[[i;;]lst]] [[[i;;]keyfunc]])     一个列表按升序排序,选择使用指定的关键功能' +
+				'\n\t (newline)                  换行符' +
+				'\n\t (do-nothing)               假命令' +
+				'\n\t (help)                     显示这个帮助页面' +
+			'\n更多的帮助请到 https://github.com/AlexNisnevich/ECMAchine'
 			;
 	},
 	'shutdown': function () {
@@ -239,13 +239,13 @@ var primitiveProcedures = {
 	    }
 	},
 
-	// Filesystem
+	// 文件系统
 	'ls': function (args) {
 		return Filesystem.listFiles(args[0]);
 	},
 	'cd': function (args) {
 		var newPath = Filesystem.navigate(args[0]);
-		Display.terminal.set_prompt('ecmachine:' + newPath + ' guest$');
+		Display.terminal.set_prompt('小宇宙:' + newPath + ' 游客$');
 		return;
 	},
 	'read': function (args) {
@@ -257,34 +257,34 @@ var primitiveProcedures = {
 	},
 	'mkdir': function (args) {
 		var path = Filesystem.makeDir(args[0]);
-		return new Array('Directory ' + path + ' created');
+		return new Array('目录 ' + path + ' 已创建');
 	},
 	'new': function (args) {
 		var path = Filesystem.newFile(args[0]);
-		return new Array('File ' + path + ' created');
+		return new Array('文件 ' + path + ' 已创建');
 	},
 	'save': function (args) {
 		var path = Filesystem.saveFile(args[0], args[1]);
-		return new Array('Saved file ' + path);
+		return new Array('保存文件 ' + path);
 	},
 	'appnd': function (args) {
 		var contents = Filesystem.readFile(args[0]);
 		var newContents = contents ? (contents + '\n' + args[1]) : args[1];
 		var path = Filesystem.saveFile(args[0], newContents);
-		return new Array('Updated file ' + path);
+		return new Array('更新文件 ' + path);
 	},
 	'mv': function (args) {
 		var paths = Filesystem.copyItem(args[0], args[1]);
 		Filesystem.removeItem(args[0]);
-		return new Array('Moved ' + paths.oldPath + ' to ' + paths.newPath);
+		return new Array('移动 ' + paths.oldPath + ' 到 ' + paths.newPath);
 	},
 	'cp': function (args) {
 		var paths = Filesystem.copyItem(args[0], args[1]);
-		return new Array('Copied ' + paths.oldPath + ' to ' + paths.newPath);
+		return new Array('复制 ' + paths.oldPath + ' 到 ' + paths.newPath);
 	},
 	'rm': function (args) {
 		var path = Filesystem.removeItem(args[0]);
-		return new Array('Removed ' + path);
+		return new Array('删除 ' + path);
 	},
 	'file?': function (args) {
 		var file = Filesystem.getFile(args[0]);
@@ -307,13 +307,13 @@ var primitiveProcedures = {
 	'start': function (args) {
 		var contents = Filesystem.readFile(args[0]);
 		var pid = Processes.startProcess(args[0], contents, args[1]);
-		Display.echo(new Array('Starting process at ' + args[0] + ' with PID ' + pid));
+		Display.echo(new Array('启动进程 ' + args[0] + ' 编号为 ' + pid));
 		return evaluate(contents, pid);
 	},
 	'peek': function (args) {
 		var process = Processes.getProcessByID(args[0]);
 		if (process.isTerminal) {
-			return '#<Terminal>';
+			return '#<终端>';
 		} else {
 			return process.code;
 		}
@@ -346,14 +346,14 @@ var primitiveProcedures = {
 			overlay.css('bottom', -y);
 		}
 
-		Processes.registerOverlay(name); // if called from process, attach overlay name to PID
+		Processes.registerOverlay(name); // 如果调用进程,将覆盖名字、编号
 		return;
 	},
 	'clear-overlay': function (args) {
 		$('#overlays #' + args[0]).remove();
 	},
 
-	// experimental
+	// 试验
 
 	'ajax': function (args) {
 		var url = 'lib/ba-simple-proxy.php?url=' + args[0];
@@ -361,7 +361,7 @@ var primitiveProcedures = {
 		var data_arr = args[1];
 		var data = data_arr.map(function(elt) {
 			return elt.car() + '=' + elt.cdr().toString();
-		}).join('&'); // send data as string rather than object, so that it's not preprocessed
+		}).join('&'); // 发送数据作为字符串而不是对象,因此它不是预处理
 
 		var callback = args[2];
 
@@ -373,7 +373,7 @@ var primitiveProcedures = {
 	},
 
 	'$': function (args) {
-		// preprocess args
+		// 预处理args
 		args = args.map(function(arg) {
 			if (arg.isString) {
 				return arg.toString();
@@ -382,7 +382,7 @@ var primitiveProcedures = {
 			}
 		})
 
-		// prepare function
+		// 准备函数
 		var func = null;
 		if (args.length > 1) {
 			var func = args[0];
@@ -391,7 +391,7 @@ var primitiveProcedures = {
 		console.log(func);
 		console.log(args);
 
-		// run function
+		// 运行函数
 		if (func) {
 			var result = $[func].apply(this, args);
 		} else {
@@ -399,7 +399,7 @@ var primitiveProcedures = {
 		}
 		console.log(result);
 
-		// process result
+		// 进程结果
 		if (typeof result == 'object') {
 			result = $.makeArray(result);
 		}

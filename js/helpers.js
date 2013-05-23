@@ -1,5 +1,5 @@
 /*
- * Clones an object
+ * 克隆一个对象
  */
 function clone(obj){
   if (obj == null || typeof(obj) != 'object') {
@@ -25,7 +25,7 @@ function prepareString(elt) {
 }
 
 /*
- * Array class (used for linked lists)
+ * 数组类(用于链表)
  */
 Array.prototype.isList = true;
 Array.prototype.toDisplayArray = function() {
@@ -49,7 +49,7 @@ Array.prototype.cdr = function () {
 }
 
 /*
- * Pair class (used by cons when result is not a well-formed list)
+ * 点对类 (使用于cons,当结果不是一个格式良好的列表时)
  */
 var Pair = function(car, cdr) {
 	this.contents = [car, cdr];
@@ -68,7 +68,7 @@ Pair.prototype.cdr = function () {
 }
 
 /*
- * String class
+ * 字符串类
  */
 String.prototype.toDisplayString = function() {
 	if (this.isString) {

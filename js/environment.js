@@ -141,7 +141,7 @@ var defaultFileSystemFrame = {
 				'contents': "(define (smile) ':-})"
 			},
 			
-			// Startup applications
+			// 启动应用程序
 			'clocks.lnk': {
 				'type': 'file',
 				'contents': "(start (path '/ 'apps 'clock.app) 1000)" +
